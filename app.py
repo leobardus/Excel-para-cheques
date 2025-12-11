@@ -264,7 +264,7 @@ def main():
             with st.spinner('Procesando datos y aplicando formatos... Esto puede tardar unos segundos.'):
                 
                 nombre_base = os.path.splitext(uploaded_file.name)[0]
-                nombre_salida = f"{nombre_base}_PROCESADO_FINAL.xlsx"
+                nombre_salida = f"Cheques a emitir.xlsx"
                 
                 # Llamar a la función de procesamiento
                 processed_excel = procesar_archivo(uploaded_file, CONFIG)
@@ -290,4 +290,5 @@ def main():
                         st.warning(f"No se pudo mostrar la vista previa: {e}")
 
 if __name__ == '__main__':
+
     main()
