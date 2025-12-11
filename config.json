@@ -1,0 +1,25 @@
+{
+    "CADENAS_A_ANULAR": ["Proveedor:", "Total:"],
+    "INDICES_A_CONSERVAR": [1, 4, 6, 10, 14, 35, 47],
+    "INDICE_COLUMNA_ORIGEN": 1,
+    "INDICE_COLUMNA_DESTINO": 3,
+    "INDICE_A_ELIMINAR_DESPUES_DE_COPIA_2": 1,
+    "MAPEO_RENOMBRE": {
+        "nan": "Codigo",
+        "nan.1": "Proveedor",
+        "nat": "Fecha Vto",
+        "fecha": "Fecha Em",
+        "nan.2": "Importe",
+        "nan.3": "Mora"
+    },
+    "RUTA_DESTINO_FIJA": "C:\\Users\\Usuario\\Downloads",
+    "COLUMNAS_REPORTADAS_UI": [
+        "Columna 1 (Código)",
+        "Columna 4 (Fecha Vto)",
+        "Columna 6 (Fecha Emisión)",
+        "Columna 10",
+        "Columna 14",
+        "Columna 35",
+        "Columna 47"
+    ]
+}
