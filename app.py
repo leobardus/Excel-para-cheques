@@ -36,16 +36,15 @@ config_data = {
 
 
 # --- ⚙️ FUNCIÓN DE CARGA DE CONFIGURACIÓN DE DATOS ---
-# NOTA: Esta función asume que tienes un archivo config.json para el procesamiento.
-# Si no lo tienes, debes crear ese archivo o inicializar CONFIG manualmente.
 def cargar_configuracion(nombre_archivo="config.json"):
     """Carga los parámetros de configuración desde un archivo JSON."""
     try:
+        # Nota: Asegúrate de que el archivo 'config.json' esté en tu repositorio de GitHub.
         with open(nombre_archivo, 'r', encoding='utf-8') as f:
             config = json.load(f)
         return config
     except FileNotFoundError:
-        st.error(f"Error: El archivo '{nombre_archivo}' no existe. Asegúrate de que '{nombre_archivo}' esté presente en tu repositorio.")
+        st.error(f"Error: El archivo '{nombre_archivo}' no existe. Por favor, súbelo a tu repositorio.")
         st.stop()
     except (json.JSONDecodeError, ValueError) as e:
         st.error(f"Error de formato en el archivo JSON: {e}")
@@ -321,8 +320,8 @@ def main():
     )
 
     # --- Mostrar el formulario de inicio de sesión ---
-    # SINTAXIS EXTREMA: Solo el título. Esto debe evitar cualquier error de parseo.
-    name, authentication_status, username = authenticator.login('Inicio de Sesión') 
+    # SOLUCIÓN FINAL: Se incluye location='main' para cumplir con el requisito de la librería (ValueError)
+    name, authentication_status, username = authenticator.login('Inicio de Sesión', location='main') 
 
     if authentication_status:
         # 1. ESTADO: Autenticado
