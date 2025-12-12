@@ -10,7 +10,6 @@ from io import BytesIO
 from collections import defaultdict
 import streamlit_authenticator as stauth
 import yaml
-# La importación de yaml la mantenemos por ahora, pero el uso es interno a la librería
 from yaml.loader import SafeLoader 
 
 # --- CONFIGURACIÓN DE USUARIOS (HARDCODEADA PARA MAYOR ESTABILIDAD) ---
@@ -37,6 +36,8 @@ config_data = {
 
 
 # --- ⚙️ FUNCIÓN DE CARGA DE CONFIGURACIÓN DE DATOS ---
+# NOTA: Esta función asume que tienes un archivo config.json para el procesamiento.
+# Si no lo tienes, debes crear ese archivo o inicializar CONFIG manualmente.
 def cargar_configuracion(nombre_archivo="config.json"):
     """Carga los parámetros de configuración desde un archivo JSON."""
     try:
@@ -44,7 +45,7 @@ def cargar_configuracion(nombre_archivo="config.json"):
             config = json.load(f)
         return config
     except FileNotFoundError:
-        st.error(f"Error: El archivo '{nombre_archivo}' no existe.")
+        st.error(f"Error: El archivo '{nombre_archivo}' no existe. Asegúrate de que '{nombre_archivo}' esté presente en tu repositorio.")
         st.stop()
     except (json.JSONDecodeError, ValueError) as e:
         st.error(f"Error de formato en el archivo JSON: {e}")
@@ -311,7 +312,7 @@ def app_content():
 def main():
     st.set_page_config(page_title="Procesador Web de Reportes de Proveedores", layout="centered")
 
-    # Inicializar el autenticador, usando la variable config_data hardcodeada
+    # Inicializar el autenticador
     authenticator = stauth.Authenticate(
         config_data['credentials'],
         config_data['cookie']['name'],
@@ -320,11 +321,8 @@ def main():
     )
 
     # --- Mostrar el formulario de inicio de sesión ---
-    # SINTAXIS FINAL para la última versión de la librería
-    name, authentication_status, username = authenticator.login(
-        'Inicio de Sesión', 
-        location='main'
-    )
+    # SINTAXIS EXTREMA: Solo el título. Esto debe evitar cualquier error de parseo.
+    name, authentication_status, username = authenticator.login('Inicio de Sesión') 
 
     if authentication_status:
         # 1. ESTADO: Autenticado
