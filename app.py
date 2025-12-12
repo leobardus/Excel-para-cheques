@@ -39,7 +39,6 @@ config_data = {
 def cargar_configuracion(nombre_archivo="config.json"):
     """Carga los parámetros de configuración desde un archivo JSON."""
     try:
-        # Nota: Asegúrate de que el archivo 'config.json' esté en tu repositorio de GitHub.
         with open(nombre_archivo, 'r', encoding='utf-8') as f:
             config = json.load(f)
         return config
@@ -320,7 +319,7 @@ def main():
     )
 
     # --- Mostrar el formulario de inicio de sesión ---
-    # SOLUCIÓN FINAL: Se incluye location='main' para cumplir con el requisito de la librería (ValueError)
+    # SINTAXIS FINAL Y COMPLETA
     name, authentication_status, username = authenticator.login('Inicio de Sesión', location='main') 
 
     if authentication_status:
