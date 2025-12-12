@@ -8,7 +8,6 @@ import xlsxwriter
 import streamlit as st
 from io import BytesIO
 from collections import defaultdict
-# Ya no necesitamos stauth ni yaml/SafeLoader
 
 # --- CONFIGURACIÓN DE USUARIOS SIMPLIFICADA ---
 # Nota: La contraseña 'Lajefa25' no está hasheada para simplificar.
@@ -56,8 +55,6 @@ def hacer_nombres_unicos(columnas):
 # -----------------------------------------------
 
 def procesar_archivo(uploaded_file, config):
-    # (El cuerpo de esta función de procesamiento es muy largo y no ha cambiado, se mantiene)
-    # ... (código anterior de procesamiento de Excel) ...
     """
     Función principal que realiza el procesamiento de datos, adaptada para Streamlit.
     Devuelve un objeto BytesIO con el Excel procesado.
@@ -254,7 +251,7 @@ def app_content():
     if st.sidebar.button("Cerrar Sesión"):
         st.session_state['authentication_status'] = False
         st.session_state['name'] = None
-        st.experimental_rerun()
+        st.rerun() # <-- CORRECCIÓN: Usar st.rerun()
 
     # 2. Selector de Archivo
     uploaded_file = st.file_uploader(
@@ -322,7 +319,7 @@ def main():
                     st.session_state['authentication_status'] = True
                     st.session_state['name'] = username_input # Guardar el nombre del usuario
                     st.success("¡Inicio de sesión exitoso!")
-                    st.experimental_rerun()
+                    st.rerun() # <-- CORRECCIÓN: Usar st.rerun()
                 else:
                     st.error("Nombre de usuario o contraseña incorrectos.")
 
