@@ -8,18 +8,41 @@ import xlsxwriter
 import streamlit as st
 from io import BytesIO
 from collections import defaultdict
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
-# --- ⚙️ FUNCIÓN DE CARGA DE CONFIGURACIÓN ---
-# La lectura del JSON debe ser robusta ya que Streamlit puede cambiar el CWD
+# --- CONFIGURACIÓN DE USUARIOS ---
+# HASH generado para la contraseña 'Lajefa25' usando bcrypt
+HASH_CONTRASENA_CECI = '$2b$12$SbBRF2XUQmoXREIeLfqbrejn2WMrBuj5Zn7sMlnAL58oJW6O.jw.O' 
+
+config_yaml = {
+    'cookie': {
+        'expiry_days': 30,
+        'key': 'some_signature_key_2024', # CLAVE SECRETA: Cámbiala por una clave única y larga
+        'name': 'processor_cookie'
+    },
+    'credentials': {
+        'usernames': {
+            'Ceci': { # USUARIO: Ceci
+                'email': 'ceci@empresa.com',
+                'name': 'Ceci (La Jefa)',
+                'password': HASH_CONTRASENA_CECI
+            }
+        }
+    }
+}
+
+
+# --- ⚙️ FUNCIÓN DE CARGA DE CONFIGURACIÓN DE DATOS ---
 def cargar_configuracion(nombre_archivo="config.json"):
     """Carga los parámetros de configuración desde un archivo JSON."""
     try:
-        # Intenta cargar desde la ruta actual (para Streamlit)
         with open(nombre_archivo, 'r', encoding='utf-8') as f:
             config = json.load(f)
         return config
     except FileNotFoundError:
-        st.error(f"Error: El archivo '{nombre_archivo}' no existe. Asegúrate de que esté en la misma carpeta.")
+        st.error(f"Error: El archivo '{nombre_archivo}' no existe.")
         st.stop()
     except (json.JSONDecodeError, ValueError) as e:
         st.error(f"Error de formato en el archivo JSON: {e}")
@@ -28,7 +51,6 @@ def cargar_configuracion(nombre_archivo="config.json"):
 # Cargar la configuración global al inicio
 CONFIG = cargar_configuracion()
 if not CONFIG:
-    st.error("No se pudo cargar la configuración.")
     st.stop()
 
 
@@ -65,7 +87,6 @@ def procesar_archivo(uploaded_file, config):
     INDICE_A_ELIMINAR_DESPUES_DE_COPIA_2 = config["INDICE_A_ELIMINAR_DESPUES_DE_COPIA_2"]
     MAPEO_RENOMBRE = config["MAPEO_RENOMBRE"]
     
-    # Usaremos BytesIO para manejar la memoria
     input_file_bytes = BytesIO(uploaded_file.getvalue())
     output = BytesIO()
 
@@ -230,24 +251,19 @@ def procesar_archivo(uploaded_file, config):
         return None
 
 # -------------------------------------------------------------------
-# --- INTERFAZ DE STREAMLIT ---
+# --- INTERFAZ DE STREAMLIT CON AUTENTICACIÓN ---
 # -------------------------------------------------------------------
 
-def main():
-    st.set_page_config(page_title="Procesador Web de Reportes de Proveedores", layout="centered")
+def app_content():
+    """Contenido de la aplicación visible solo después del inicio de sesión."""
     
     st.title("⚙️ Procesador Web de Reportes de Proveedores")
-    st.markdown("Sube tu archivo de Excel con celdas combinadas y haz clic en 'Procesar' para obtener el reporte limpio y formateado.")
-
-    # Mostrar advertencia de columnas (como lo hacía la GUI)
-    COLUMNAS_REPORTADAS = CONFIG.get("COLUMNAS_REPORTADAS_UI", [])
-    if COLUMNAS_REPORTADAS:
-        nombres = "\n- ".join(COLUMNAS_REPORTADAS)
-        st.warning(
-            f"⚠️ **Requisito de Columnas:** El script espera datos en las columnas originales:\n"
-            f"- {nombres}\n"
-            "Asegúrate de que el archivo de origen sea el Reporte de Proveedores sin modificar."
-        )
+    st.markdown(f"Bienvenido(a), **{st.session_state['name']}**. Sube tu archivo y procesa el reporte.")
+    
+    # 🚨 NUEVO MENSAJE DE ADVERTENCIA 🚨
+    st.warning(
+        "⚠️ **¡ATENCIÓN!** Antes de subir el archivo, **copie la información del excel generado por Bejerman en un nuevo archivo de Excel** y utilice ese nuevo archivo para subirlo a la página web."
+    )
 
     # 1. Selector de Archivo
     uploaded_file = st.file_uploader(
@@ -264,7 +280,7 @@ def main():
             with st.spinner('Procesando datos y aplicando formatos... Esto puede tardar unos segundos.'):
                 
                 nombre_base = os.path.splitext(uploaded_file.name)[0]
-                nombre_salida = f"Cheques a emitir.xlsx"
+                nombre_salida = f"{nombre_base}_PROCESADO_FINAL.xlsx"
                 
                 # Llamar a la función de procesamiento
                 processed_excel = procesar_archivo(uploaded_file, CONFIG)
@@ -289,6 +305,36 @@ def main():
                     except Exception as e:
                         st.warning(f"No se pudo mostrar la vista previa: {e}")
 
-if __name__ == '__main__':
 
+def main():
+    st.set_page_config(page_title="Procesador Web de Reportes de Proveedores", layout="centered")
+
+    # Inicializar el autenticador
+    authenticator = stauth.Authenticate(
+        config_yaml['credentials'],
+        config_yaml['cookie']['name'],
+        config_yaml['cookie']['key'],
+        config_yaml['cookie']['expiry_days']
+    )
+
+    # --- Mostrar el formulario de inicio de sesión ---
+    name, authentication_status, username = authenticator.login('Inicio de Sesión', 'main')
+
+    if authentication_status:
+        # 1. ESTADO: Autenticado
+        st.session_state['name'] = name # Guardar el nombre del usuario en la sesión
+        st.sidebar.markdown(f"**Bienvenido/a:** {name}")
+        authenticator.logout('Cerrar Sesión', 'sidebar') # Botón de cierre en la barra lateral
+        app_content() # Mostrar el contenido principal de la aplicación
+        
+    elif authentication_status is False:
+        # 2. ESTADO: Falla de autenticación
+        st.error('Nombre de usuario/contraseña incorrectos.')
+    
+    elif authentication_status is None:
+        # 3. ESTADO: No ha intentado o está pendiente
+        st.warning('Por favor, ingresa tu nombre de usuario y contraseña para acceder.')
+
+
+if __name__ == '__main__':
     main()
