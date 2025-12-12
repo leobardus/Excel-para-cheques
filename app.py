@@ -239,7 +239,7 @@ def procesar_archivo(uploaded_file, config):
 def app_content():
     """Contenido de la aplicación visible solo después del inicio de sesión."""
     
-    st.title("Generador de cheques a emitir para LA JEFA")
+    st.title("Cheques a emitir para LA JEFA")
     st.markdown(f"Bienvenido(a), **{st.session_state['name']}**. Sube tu archivo y procesa el reporte.")
     
     # NUEVO MENSAJE DE ADVERTENCIA 
@@ -328,3 +328,4 @@ if __name__ == '__main__':
     # La aplicación se ejecuta desde aquí
 
     main()
+
