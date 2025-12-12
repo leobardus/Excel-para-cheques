@@ -318,8 +318,11 @@ def main():
     )
 
     # --- Mostrar el formulario de inicio de sesión ---
-    # SOLUCIÓN FINAL: TODA LA LLAMADA EN UNA SOLA LÍNEA PARA EVITAR ERRORES DE PARSEO DEL SERVIDOR
-    name, authentication_status, username = authenticator.login('Inicio de Sesión', location='main', key='login_form_key')
+    # SINTAXIS FINAL para la última versión de la librería, usando múltiples líneas.
+    name, authentication_status, username = authenticator.login(
+        'Inicio de Sesión', 
+        location='main'
+    )
 
     if authentication_status:
         # 1. ESTADO: Autenticado
