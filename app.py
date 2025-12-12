@@ -8,32 +8,13 @@ import xlsxwriter
 import streamlit as st
 from io import BytesIO
 from collections import defaultdict
-import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader 
+# Ya no necesitamos stauth ni yaml/SafeLoader
 
-# --- CONFIGURACIÓN DE USUARIOS (HARDCODEADA PARA MAYOR ESTABILIDAD) ---
-# HASH generado para la contraseña 'Lajefa25' usando bcrypt
-HASH_CONTRASENA_CECI = '$2b$12$SbBRF2XUQmoXREIeLfqbrejn2WMrBuj5Zn7sMlnAL58oJW6O.jw.O' 
-
-# Las credenciales ahora son un diccionario Python directo
-config_data = {
-    'cookie': {
-        'expiry_days': 30,
-        'key': 'some_signature_key_2024',
-        'name': 'processor_cookie'
-    },
-    'credentials': {
-        'usernames': {
-            'Ceci': {
-                'email': 'ceci@empresa.com',
-                'name': 'Ceci (La Jefa)',
-                'password': HASH_CONTRASENA_CECI
-            }
-        }
-    }
+# --- CONFIGURACIÓN DE USUARIOS SIMPLIFICADA ---
+# Nota: La contraseña 'Lajefa25' no está hasheada para simplificar.
+USUARIOS = {
+    "Ceci": "Lajefa25"  # <--- ¡MUY IMPORTANTE CAMBIAR ESTO POR UNA CONTRASEÑA FUERTE!
 }
-
 
 # --- ⚙️ FUNCIÓN DE CARGA DE CONFIGURACIÓN DE DATOS ---
 def cargar_configuracion(nombre_archivo="config.json"):
@@ -75,6 +56,8 @@ def hacer_nombres_unicos(columnas):
 # -----------------------------------------------
 
 def procesar_archivo(uploaded_file, config):
+    # (El cuerpo de esta función de procesamiento es muy largo y no ha cambiado, se mantiene)
+    # ... (código anterior de procesamiento de Excel) ...
     """
     Función principal que realiza el procesamiento de datos, adaptada para Streamlit.
     Devuelve un objeto BytesIO con el Excel procesado.
@@ -251,8 +234,9 @@ def procesar_archivo(uploaded_file, config):
         st.error(f"Ocurrió un error inesperado durante el procesamiento: {e}")
         return None
 
+
 # -------------------------------------------------------------------
-# --- INTERFAZ DE STREAMLIT CON AUTENTICACIÓN ---
+# --- INTERFAZ DE STREAMLIT CON AUTENTICACIÓN (Nativa) ---
 # -------------------------------------------------------------------
 
 def app_content():
@@ -266,7 +250,13 @@ def app_content():
         "⚠️ **¡ATENCIÓN!** Antes de subir el archivo, **copie la información del excel generado por Bejerman en un nuevo archivo de Excel** y utilice ese nuevo archivo para subirlo a la página web."
     )
 
-    # 1. Selector de Archivo
+    # 1. Botón de Cerrar Sesión en la barra lateral
+    if st.sidebar.button("Cerrar Sesión"):
+        st.session_state['authentication_status'] = False
+        st.session_state['name'] = None
+        st.experimental_rerun()
+
+    # 2. Selector de Archivo
     uploaded_file = st.file_uploader(
         "Sube aquí el archivo .xlsx (Excel)", 
         type=["xlsx"],
@@ -275,7 +265,7 @@ def app_content():
 
     if uploaded_file is not None:
         
-        # 2. Botón de Procesamiento
+        # 3. Botón de Procesamiento
         if st.button("🚀 Procesar Archivo y Descargar"):
             
             with st.spinner('Procesando datos y aplicando formatos... Esto puede tardar unos segundos.'):
@@ -289,7 +279,7 @@ def app_content():
                 if processed_excel:
                     st.success("✅ ¡Procesamiento completado con éxito!")
                     
-                    # 3. Botón de Descarga
+                    # 4. Botón de Descarga
                     st.download_button(
                         label="⬇️ Descargar Archivo Procesado",
                         data=processed_excel,
@@ -310,33 +300,33 @@ def app_content():
 def main():
     st.set_page_config(page_title="Procesador Web de Reportes de Proveedores", layout="centered")
 
-    # Inicializar el autenticador
-    authenticator = stauth.Authenticate(
-        config_data['credentials'],
-        config_data['cookie']['name'],
-        config_data['cookie']['key'],
-        config_data['cookie']['expiry_days']
-    )
+    if 'authentication_status' not in st.session_state:
+        st.session_state['authentication_status'] = False
+        st.session_state['name'] = None
 
-    # --- Mostrar el formulario de inicio de sesión ---
-    # SINTAXIS FINAL Y COMPLETA
-    name, authentication_status, username = authenticator.login('Inicio de Sesión', location='main') 
-
-    if authentication_status:
-        # 1. ESTADO: Autenticado
-        st.session_state['name'] = name # Guardar el nombre del usuario en la sesión
-        st.sidebar.markdown(f"**Bienvenido/a:** {name}")
-        authenticator.logout('Cerrar Sesión', 'sidebar') # Botón de cierre en la barra lateral
-        app_content() # Mostrar el contenido principal de la aplicación
+    if st.session_state['authentication_status']:
+        # ESTADO: Autenticado
+        st.sidebar.markdown(f"**Bienvenido/a:** {st.session_state['name']}")
+        app_content()
         
-    elif authentication_status is False:
-        # 2. ESTADO: Falla de autenticación
-        st.error('Nombre de usuario/contraseña incorrectos.')
-    
-    elif authentication_status is None:
-        # 3. ESTADO: No ha intentado o está pendiente
-        st.warning('Por favor, ingresa tu nombre de usuario y contraseña para acceder.')
+    else:
+        # ESTADO: No autenticado, mostrar formulario nativo
+        st.title("Inicio de Sesión")
+        with st.form("login_form"):
+            username_input = st.text_input("Usuario")
+            password_input = st.text_input("Contraseña", type="password")
+            submitted = st.form_submit_button("Ingresar")
+
+            if submitted:
+                if username_input in USUARIOS and USUARIOS[username_input] == password_input:
+                    st.session_state['authentication_status'] = True
+                    st.session_state['name'] = username_input # Guardar el nombre del usuario
+                    st.success("¡Inicio de sesión exitoso!")
+                    st.experimental_rerun()
+                else:
+                    st.error("Nombre de usuario o contraseña incorrectos.")
 
 
 if __name__ == '__main__':
+    # La aplicación se ejecuta desde aquí
     main()
