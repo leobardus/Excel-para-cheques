@@ -10,21 +10,23 @@ from io import BytesIO
 from collections import defaultdict
 import streamlit_authenticator as stauth
 import yaml
-from yaml.loader import SafeLoader
+# La importación de yaml la mantenemos por ahora, pero el uso es interno a la librería
+from yaml.loader import SafeLoader 
 
-# --- CONFIGURACIÓN DE USUARIOS ---
+# --- CONFIGURACIÓN DE USUARIOS (HARDCODEADA PARA MAYOR ESTABILIDAD) ---
 # HASH generado para la contraseña 'Lajefa25' usando bcrypt
 HASH_CONTRASENA_CECI = '$2b$12$SbBRF2XUQmoXREIeLfqbrejn2WMrBuj5Zn7sMlnAL58oJW6O.jw.O' 
 
-config_yaml = {
+# Las credenciales ahora son un diccionario Python directo
+config_data = {
     'cookie': {
         'expiry_days': 30,
-        'key': 'some_signature_key_2024', # CLAVE SECRETA: Cámbiala por una clave única y larga
+        'key': 'some_signature_key_2024',
         'name': 'processor_cookie'
     },
     'credentials': {
         'usernames': {
-            'Ceci': { # USUARIO: Ceci
+            'Ceci': {
                 'email': 'ceci@empresa.com',
                 'name': 'Ceci (La Jefa)',
                 'password': HASH_CONTRASENA_CECI
@@ -309,16 +311,16 @@ def app_content():
 def main():
     st.set_page_config(page_title="Procesador Web de Reportes de Proveedores", layout="centered")
 
-    # Inicializar el autenticador
+    # Inicializar el autenticador, usando la variable config_data hardcodeada
     authenticator = stauth.Authenticate(
-        config_yaml['credentials'],
-        config_yaml['cookie']['name'],
-        config_yaml['cookie']['key'],
-        config_yaml['cookie']['expiry_days']
+        config_data['credentials'],
+        config_data['cookie']['name'],
+        config_data['cookie']['key'],
+        config_data['cookie']['expiry_days']
     )
 
     # --- Mostrar el formulario de inicio de sesión ---
-    # SINTAXIS FINAL para la última versión de la librería, usando múltiples líneas.
+    # SINTAXIS FINAL para la última versión de la librería
     name, authentication_status, username = authenticator.login(
         'Inicio de Sesión', 
         location='main'
