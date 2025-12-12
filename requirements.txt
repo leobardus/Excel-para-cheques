@@ -3,6 +3,5 @@ pandas
 openpyxl
 xlsxwriter
 numpy
-streamlit-authenticator==0.2.2
+streamlit-authenticator==0.2.2  # <--- ¡Verifica que esta línea esté así!
 bcrypt
-
