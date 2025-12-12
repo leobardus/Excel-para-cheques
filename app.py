@@ -84,7 +84,7 @@ def procesar_archivo(uploaded_file, config):
     INDICES_A_CONSERVAR = config["INDICES_A_CONSERVAR"]
     INDICE_COLUMNA_ORIGEN = config["INDICE_COLUMNA_ORIGEN"]
     INDICE_COLUMNA_DESTINO = config["INDICE_COLUMNA_DESTINO"]
-    INDICE_A_ELIMINAR_DESPUES_DE_COPIA_2 = config["INDICE_A_ELIMINAR_DESPUES_DE_COPIA_2"]
+    INDICE_A_ELIMINAR_DESPUES_DE_COPIA_2 = config["INDICE_A_ELIMINAR_DESPUÑA_DE_COPIA_2"]
     MAPEO_RENOMBRE = config["MAPEO_RENOMBRE"]
     
     input_file_bytes = BytesIO(uploaded_file.getvalue())
@@ -318,7 +318,7 @@ def main():
     )
 
     # --- Mostrar el formulario de inicio de sesión ---
-    # LÍNEA CORREGIDA PARA EL ERROR DE LOCATION
+    # SINTAXIS CORREGIDA: Especifica location y key para estabilidad
     name, authentication_status, username = authenticator.login(
         'Inicio de Sesión', 
         location='main', 
